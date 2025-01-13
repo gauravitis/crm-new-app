@@ -160,22 +160,37 @@
                 @input="calculateItemTotals(index)"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="2">
               <v-text-field
-                v-model.number="item.unitRate"
+                v-model="item.unitRate"
+                label="Unit Rate"
                 type="number"
-                label="Unit Rate*"
-                prefix="₹"
-                readonly
+                @input="calculateItemTotals(index)"
+                :rules="[v => !!v || 'Unit Rate is required']"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="2">
               <v-text-field
-                v-model.number="item.discountPercentage"
-                type="number"
+                v-model="item.discountPercentage"
                 label="Discount %"
-                suffix="%"
+                type="number"
                 @input="calculateItemTotals(index)"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="2">
+              <v-text-field
+                v-model="item.gstPercentage"
+                label="GST %"
+                type="number"
+                @input="calculateItemTotals(index)"
+                :rules="[v => !!v || 'GST % is required']"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="2">
+              <v-text-field
+                v-model="item.leadTime"
+                label="Lead Time"
+                placeholder="e.g., 2-3 weeks"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="3">
@@ -194,15 +209,6 @@
                 label="Extended Rate"
                 prefix="₹"
                 readonly
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-text-field
-                v-model.number="item.gstPercentage"
-                type="number"
-                label="GST %"
-                suffix="%"
-                @input="calculateItemTotals(index)"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="3">
@@ -376,8 +382,6 @@ const paymentTermsOptions = [
 // Default quotation state
 interface QuotationItem {
   catalogueId: string;
-  description: string;
-  packSize: string;
   quantity: number;
   unitRate: number;
   discountPercentage: number;
@@ -386,6 +390,7 @@ interface QuotationItem {
   gstPercentage: number;
   totalGst: number;
   totalPrice: number;
+  leadTime: string;
 }
 
 // Update the quotation interface to include company details
@@ -466,7 +471,8 @@ const handleItemSelect = (itemId: string, index: number) => {
       discountedRate: 0,
       extendedRate: 0,
       totalGst: 0,
-      totalPrice: 0
+      totalPrice: 0,
+      leadTime: ''
     };
     calculateItemTotals(index);
   }
@@ -492,8 +498,6 @@ const calculateItemTotals = (index: number) => {
 const addItem = () => {
   quotation.value.items.push({
     catalogueId: '',
-    description: '',
-    packSize: '',
     quantity: 1,
     unitRate: 0,
     discountPercentage: 0,
@@ -501,7 +505,8 @@ const addItem = () => {
     extendedRate: 0,
     gstPercentage: 18,
     totalGst: 0,
-    totalPrice: 0
+    totalPrice: 0,
+    leadTime: ''
   });
 };
 
@@ -629,7 +634,8 @@ const downloadQuotation = async () => {
           gst: item.gstPercentage,
           gstValue: item.totalGst,
           total: item.totalPrice,
-          expandedPrice: item.quantity * item.discountedRate
+          expandedPrice: item.quantity * item.discountedRate,
+          leadTime: item.leadTime
         };
       }),
       subtotal: subtotal.value,
